@@ -18,3 +18,10 @@
 - GET /violations - Retrieve violation list
 - POST /permissions - Set agent permissions
 - GET /status - System health check
+
+## Render (FE)
+https://aigs-mvp.onrender.com/
+
+## Personal Access Token (Github)
+
+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
