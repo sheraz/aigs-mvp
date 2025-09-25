@@ -104,6 +104,10 @@ class ViolationsList {
                 <div class="bg-white shadow rounded-lg p-6">
                     <div class="text-red-600">
                         Error loading violations: ${this.error}
+                        <button onclick="violationsList.fetchViolations()" 
+                                class="ml-4 px-3 py-1 bg-red-100 hover:bg-red-200 rounded text-sm">
+                            Retry
+                        </button>
                     </div>
                 </div>
             `;
@@ -163,10 +167,6 @@ class ViolationsList {
                                     Live
                                 </span>
                             ` : ''}
-                            <button onclick="violationsList.fetchViolations()"
-                                    class="px-3 py-1 bg-blue-100 hover:bg-blue-200 rounded text-sm">
-                                Refresh
-                            </button>
                         </div>
                     </div>
                     
