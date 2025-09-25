@@ -76,7 +76,12 @@ class ViolationsList {
     }
 
     startAutoRefresh() {
-        setInterval(() => this.fetchViolations(), 30000);
+        setInterval(() => {
+            // Only refresh if WebSocket is not connected
+            if (!webSocketManager || !webSocketManager.connected) {
+                this.fetchViolations();
+            }
+        }, 30000);
     }
 
     getTimeAgo(timestamp) {
