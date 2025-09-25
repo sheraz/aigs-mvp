@@ -83,8 +83,13 @@ class MetricsCard {
         this.render();
     }
 
-    startAutoRefresh() {
-        setInterval(() => this.calculateMetrics(), 30000);
+   startAutoRefresh() {
+        setInterval(() => {
+            // Only refresh if WebSocket is not connected
+            if (!webSocketManager || !webSocketManager.connected) {
+                this.calculateMetrics();
+            }
+        }, 30000);
     }
 
     render() {
