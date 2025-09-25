@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const http = require('http');
+const socketIo = require('socket.io');
 require('dotenv').config();
 
 // Add this after the existing imports
@@ -7,11 +9,91 @@ const { dbOperations } = require('./database');
 const { detectViolation } = require('./detector');
 
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
+
 const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// WebSocket connection tracking
+let connectedClients = 0;
+
+// Handle WebSocket connections
+io.on('connection', (socket) => {
+  connectedClients++;
+  console.log(`Dashboard connected. Total clients: ${connectedClients}`);
+
+  // Send recent violations when dashboard connects
+  dbOperations.getViolations((err, violations) => {
+    if (!err && violations.length > 0) {
+      socket.emit('initial_violations', violations);
+    }
+  });
+
+  // Handle dashboard disconnection
+  socket.on('disconnect', () => {
+    connectedClients--;
+    console.log(`Dashboard disconnected. Total clients: ${connectedClients}`);
+  });
+
+  // Handle demo mode requests
+  socket.on('start_demo', () => {
+    console.log('Starting demo mode...');
+    startDemoMode(socket);
+  });
+});
+
+// Demo mode - simulate violations for presentations
+function startDemoMode(socket) {
+  const demoViolations = [
+    {
+      id: 'demo-1',
+      agent_id: 'financial-advisor-ai',
+      agent_name: 'Financial Advisor AI',
+      action_type: 'access_customer_bank_details',
+      severity: 'HIGH',
+      reason: 'Agent attempted to access bank details without customer consent',
+      details: { customerId: 'CUST_12345', accountType: 'savings' },
+      timestamp: new Date().toISOString()
+    },
+    {
+      id: 'demo-2', 
+      agent_id: 'hr-screening-ai',
+      agent_name: 'HR Screening AI',
+      action_type: 'access_protected_characteristics',
+      severity: 'HIGH',
+      reason: 'AI attempted to access protected characteristics during hiring process',
+      details: { candidateId: 'CAND_67890', characteristic: 'age_data' },
+      timestamp: new Date(Date.now() + 3000).toISOString()
+    },
+    {
+      id: 'demo-3',
+      agent_id: 'customer-service-ai', 
+      agent_name: 'Customer Service AI',
+      action_type: 'share_personal_data_externally',
+      severity: 'MEDIUM',
+      reason: 'Agent attempted to share personal data with external service',
+      details: { customerId: 'CUST_54321', externalService: 'marketing-platform' },
+      timestamp: new Date(Date.now() + 6000).toISOString()
+    }
+  ];
+
+  // Send demo violations with delays for dramatic effect
+  demoViolations.forEach((violation, index) => {
+    setTimeout(() => {
+      socket.emit('violation', violation);
+      console.log(`🎭 Demo violation sent: ${violation.action_type}`);
+    }, index * 3000); // 3 second delays
+  });
+}
 
 // Test endpoint
 app.get('/', (req, res) => {
@@ -21,9 +103,7 @@ app.get('/', (req, res) => {
   });
 });
 
-// Add these endpoints after the basic test endpoint
-
-// 1. ENDPOINT: AI agents report actions (UPDATED WITH VIOLATION DETECTION)
+// 1. ENDPOINT: AI agents report actions (WITH VIOLATION DETECTION + WEBSOCKETS)
 app.post('/agent/action', (req, res) => {
   const { agentId, action, details } = req.body;
   
@@ -70,11 +150,11 @@ app.post('/agent/action', (req, res) => {
             console.log(`🚨 VIOLATION DETECTED: ${agentId} attempted ${action}`);
             
             // Send real-time alert to connected dashboards
-            // io.emit('violation', {
-              // ...result.violation,
-              // id: Date.now(), // Temporary ID for real-time display
-              // timestamp: new Date().toISOString()
-            // });
+            io.emit('violation', {
+              ...result.violation,
+              id: Date.now(), // Temporary ID for real-time display
+              timestamp: new Date().toISOString()
+            });
           }
         });
 
@@ -150,7 +230,34 @@ app.get('/agent/:agentId', (req, res) => {
   });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// Demo mode endpoint
+app.post('/demo/start', (req, res) => {
+  console.log('Demo mode triggered via API');
+  
+  // Broadcast to all connected dashboards
+  io.emit('demo_started', { 
+    message: 'Demo mode activated',
+    timestamp: new Date().toISOString()
+  });
+
+  res.json({ 
+    status: 'demo_started',
+    message: 'Demo violations will be sent to connected dashboards',
+    connectedClients: connectedClients
+  });
+});
+
+// Get system status
+app.get('/status', (req, res) => {
+  res.json({
+    status: 'running',
+    connectedClients: connectedClients,
+    timestamp: new Date().toISOString(),
+    database: 'connected'
+  });
+});
+
+// Start server with WebSocket support
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT} with WebSocket support`);
 });
