@@ -4,6 +4,7 @@ require('dotenv').config();
 
 // Add this after the existing imports
 const { dbOperations } = require('./database');
+const { detectViolation } = require('./detector');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -22,7 +23,7 @@ app.get('/', (req, res) => {
 
 // Add these endpoints after the basic test endpoint
 
-// 1. ENDPOINT: AI agents report actions
+// 1. ENDPOINT: AI agents report actions (UPDATED WITH VIOLATION DETECTION)
 app.post('/agent/action', (req, res) => {
   const { agentId, action, details } = req.body;
   
@@ -32,24 +33,56 @@ app.post('/agent/action', (req, res) => {
       error: 'Missing required fields: agentId and action' 
     });
   }
-  // Store the action
+
+  // Store the action first
   const actionData = {
     agent_id: agentId,
     action_type: action,
     details: details || {}
   };
+
   dbOperations.addAction(actionData, (err) => {
     if (err) {
       console.error('Database error:', err);
       return res.status(500).json({ error: 'Failed to store action' });
     }
-    // TODO: Check for violations (we'll add this in days 5-7)
-    console.log(`Action received: ${agentId} performed ${action}`);
-    
-    res.json({ 
-      status: 'received',
-      message: 'Action logged successfully',
-      timestamp: new Date().toISOString()
+
+    // Now check for violations
+    detectViolation(agentId, action, details || {}, (err, result) => {
+      if (err) {
+        console.error('Violation detection error:', err);
+        return res.status(500).json({ error: 'Failed to check permissions' });
+      }
+
+      const response = {
+        status: 'processed',
+        message: 'Action logged successfully',
+        timestamp: new Date().toISOString(),
+        violation: result.isViolation
+      };
+
+      if (result.isViolation) {
+        // Store violation in database
+        dbOperations.addViolation(result.violation, (err) => {
+          if (err) {
+            console.error('Failed to store violation:', err);
+          } else {
+            console.log(`🚨 VIOLATION DETECTED: ${agentId} attempted ${action}`);
+            
+            // Send real-time alert to connected dashboards
+            // io.emit('violation', {
+              // ...result.violation,
+              // id: Date.now(), // Temporary ID for real-time display
+              // timestamp: new Date().toISOString()
+            // });
+          }
+        });
+
+        response.alert = 'Action violated permissions';
+        response.severity = result.violation.severity;
+      }
+
+      res.json(response);
     });
   });
 });
