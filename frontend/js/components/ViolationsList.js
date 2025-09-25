@@ -10,7 +10,45 @@ class ViolationsList {
     async init() {
         this.render();
         await this.fetchViolations();
+        this.setupWebSocketHandlers();
         this.startAutoRefresh();
+    }
+
+    setupWebSocketHandlers() {
+        // Wait for WebSocket manager to be available
+        if (typeof webSocketManager === 'undefined') {
+            setTimeout(() => this.setupWebSocketHandlers(), 100);
+            return;
+        }
+
+        // Handle new violations
+        webSocketManager.on('violation', (violation) => {
+            console.log('ViolationsList received new violation:', violation);
+            
+            // Add to the top of the list
+            this.violations.unshift(violation);
+            this.render();
+            
+            // Show toast notification
+            toastManager.addToast(
+                `New ${violation.severity} violation: ${violation.agent_name || violation.agent_id}`,
+                violation.severity === 'HIGH' ? 'error' : 
+                violation.severity === 'MEDIUM' ? 'warning' : 'info',
+                8000
+            );
+        });
+
+        // Handle initial violations data when connecting
+        webSocketManager.on('initial_violations', (initialViolations) => {
+            console.log('ViolationsList received initial violations:', initialViolations);
+            this.violations = initialViolations;
+            this.render();
+        });
+
+        // Handle demo mode events
+        webSocketManager.on('demo_started', () => {
+            toastManager.addToast('Demo mode activated - Simulated violations incoming', 'info', 5000);
+        });
     }
 
     async fetchViolations() {
@@ -85,8 +123,10 @@ class ViolationsList {
             return;
         }
 
-        const violationRows = this.violations.map(violation => `
-            <tr class="hover:bg-gray-50">
+        const isConnected = webSocketManager && webSocketManager.connected;
+        
+        const violationRows = this.violations.map((violation, index) => `
+            <tr class="hover:bg-gray-50 ${index === 0 ? 'animate-pulse bg-blue-50' : ''}">
                 <td class="px-6 py-4 whitespace-nowrap">
                     <div class="text-sm font-medium text-gray-900">
                         ${violation.agent_name || violation.agent_id}
@@ -120,11 +160,20 @@ class ViolationsList {
                 <div class="px-4 py-5 sm:p-6">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-lg font-medium text-gray-900">Recent Violations</h3>
-                        <button onclick="violationsList.fetchViolations()" 
-                                class="px-3 py-1 bg-blue-100 hover:bg-blue-200 rounded text-sm">
-                            Refresh
-                        </button>
+                        <div class="flex space-x-2">
+                            ${isConnected ? `
+                                <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                                    <span class="w-1.5 h-1.5 bg-green-400 rounded-full mr-1 animate-pulse"></span>
+                                    Live
+                                </span>
+                            ` : ''}
+                            <button onclick="violationsList.fetchViolations()"
+                                    class="px-3 py-1 bg-blue-100 hover:bg-blue-200 rounded text-sm">
+                                Refresh
+                            </button>
+                        </div>
                     </div>
+                    
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
@@ -140,8 +189,16 @@ class ViolationsList {
                             </tbody>
                         </table>
                     </div>
+                    
                     ${this.violations.length === 0 ? `
-                        <div class="text-center py-4 text-gray-500">No violations detected</div>
+                        <div class="text-center py-8">
+                            <div class="text-gray-500 text-lg">No violations detected</div>
+                            <div class="text-sm text-gray-400 mt-2">
+                                ${isConnected ? 
+                                  'Monitoring active - violations will appear here in real-time' : 
+                                  'Connect to start monitoring'}
+                            </div>
+                        </div>
                     ` : ''}
                 </div>
             </div>
