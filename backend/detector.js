@@ -150,17 +150,16 @@ function checkAdvancedViolations(agentId, actionType, actionDetails, callback) {
 
 // Check if agent is performing actions too quickly
 function checkRapidActions(agentId, actionType, callback) {
-  const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-  
-  // Query recent actions from same agent
+  // Use SQLite datetime function for proper timestamp comparison
   const query = `
     SELECT COUNT(*) as count 
     FROM actions 
-    WHERE agent_id = ? AND action_type = ? AND timestamp > ?
+    WHERE agent_id = ? AND action_type = ? 
+    AND datetime(timestamp) > datetime('now', '-5 minutes')
   `;
   
   const { db } = require('./database');
-  db.get(query, [agentId, actionType, fiveMinutesAgo], (err, row) => {
+  db.get(query, [agentId, actionType], (err, row) => {
     if (err) return callback(err, false);
     
     // More than 10 of same action in 5 minutes = suspicious
