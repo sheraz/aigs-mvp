@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     toastManager = new ToastManager();
     
     // Initialize WebSocket manager
-    webSocketManager = new WebSocketManager('https://aigs-mvp.onrende.com');
+    webSocketManager = new WebSocketManager('https://aigs-mvp.onrender.com');
 
     // Initialize all dashboard components
     window.violationsList = new ViolationsList('violations-container');
