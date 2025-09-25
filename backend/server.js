@@ -240,6 +240,35 @@ app.post('/demo/start', (req, res) => {
     timestamp: new Date().toISOString()
   });
 
+  // Create and emit demo violations
+  const demoViolations = [
+    {
+      id: Date.now(),
+      agent_id: 'demo-financial-ai',
+      agent_name: 'Financial AI Assistant',
+      action_type: 'access_customer_data',
+      severity: 'HIGH',
+      reason: 'Unauthorized access to customer financial records',
+      timestamp: new Date().toISOString()
+    },
+    {
+      id: Date.now() + 1,
+      agent_id: 'demo-hr-ai', 
+      agent_name: 'HR AI Assistant',
+      action_type: 'process_employee_data',
+      severity: 'MEDIUM',
+      reason: 'Processing employee data without proper consent',
+      timestamp: new Date(Date.now() + 2000).toISOString()
+    }
+  ];
+
+  // Emit violations with delay
+  demoViolations.forEach((violation, index) => {
+    setTimeout(() => {
+      io.emit('violation', violation);
+    }, index * 3000); // 3 second delay between violations
+  });
+
   res.json({ 
     status: 'demo_started',
     message: 'Demo violations will be sent to connected dashboards',
