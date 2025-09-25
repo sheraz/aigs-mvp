@@ -104,7 +104,7 @@ class ViolationsList {
                 <div class="bg-white shadow rounded-lg p-6">
                     <div class="text-red-600">
                         Error loading violations: ${this.error}
-                        <button onclick="violationsList.fetchViolations()" 
+                        <button onclick="window.violationsList.fetchViolations()" 
                                 class="ml-4 px-3 py-1 bg-red-100 hover:bg-red-200 rounded text-sm">
                             Retry
                         </button>
