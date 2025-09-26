@@ -15,37 +15,37 @@ class DemoModeToggle {
 
     setupDemoHandlers() {
         // Wait for demo manager to be available before setting up handlers
-        if (typeof demoManager === 'undefined') {
+        if (typeof window.demoManager === 'undefined') {
             setTimeout(() => this.setupDemoHandlers(), 100);
             return;
         }
 
         // Re-render when demo mode changes
-        demoManager.on('demo_mode_changed', () => {
+        window.demoManager.on('demo_mode_changed', () => {
             this.render();
         });
 
         // Re-render when demo starts/stops
-        demoManager.on('demo_started', () => {
+        window.demoManager.on('demo_started', () => {
             this.render();
         });
 
-        demoManager.on('demo_stopped', () => {
+        window.demoManager.on('demo_stopped', () => {
             this.render();
         });
     }
 
     // Toggle demo mode on/off
     toggleDemoMode() {
-        if (typeof demoManager !== 'undefined') {
-            demoManager.toggleDemoMode();
+        if (typeof window.demoManager !== 'undefined') {
+            window.demoManager.toggleDemoMode();
         }
     }
 
     render() {
         // Get current demo state
-        const isDemoMode = demoManager ? demoManager.isDemoMode : false;
-        const isDemoRunning = demoManager ? demoManager.isDemoRunning : false;
+        const isDemoMode = window.demoManager ? window.demoManager.isDemoMode : false;
+        const isDemoRunning = window.demoManager ? window.demoManager.isDemoRunning : false;
 
         // Render toggle switch with current state
         this.container.innerHTML = `
