@@ -1,5 +1,6 @@
 class DemoManager {
     constructor() {
+        console.log('DemoManager constructor called');
         // Demo mode state management
         this.isDemoMode = false;
         this.isDemoRunning = false;
