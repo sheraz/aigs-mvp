@@ -30,5 +30,5 @@ document.addEventListener('DOMContentLoaded', function() {
     scenarioSelector = new ScenarioSelector('scenario-selector-container');
     console.log('ScenarioSelector created:', scenarioSelector);
         
-    console.log('Metis Dashboard initialized');
+    console.log('Metis Dashboard initialized with demo apparently');
 });
