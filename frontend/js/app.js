@@ -22,8 +22,8 @@ document.addEventListener('DOMContentLoaded', function() {
     window.metricsCard = new MetricsCard('metrics-container');
 
     // Initialize demo components - NEW
-    demoModeToggle = new DemoModeToggle('demo-toggle-container');
-    scenarioSelector = new ScenarioSelector('scenario-selector-container');
+    window.demoModeToggle = new DemoModeToggle('demo-toggle-container');
+    window.scenarioSelector = new ScenarioSelector('scenario-selector-container');
         
     console.log('Metis Dashboard initialized with demo apparently');
 });
