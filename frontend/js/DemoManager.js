@@ -93,7 +93,14 @@ class DemoManager {
         // Listen for demo events from backend
         webSocketManager.on('demo_started', () => {
             console.log('Demo started event received');
-            this.isDemoRunning = true;
+            if (this.isDemoMode) {
+                // If we're in UI demo mode, backend demo should reset our state
+                this.isDemoRunning = false;
+                this.activeScenario = null;
+            } else {
+                // If we're in live mode, backend demo sets running state
+                this.isDemoRunning = true;
+            }
             this.triggerEvent('demo_started');
         });
 
