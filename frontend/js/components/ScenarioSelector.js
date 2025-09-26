@@ -98,7 +98,7 @@ class ScenarioSelector {
                             </div>
                         ` : ''}
                     </div>
-                    <button onclick="scenarioSelector.handleStartScenario('${scenario.id}')"
+                    <button onclick="window.scenarioSelector.handleStartScenario('${scenario.id}')"
                             ${this.loading === scenario.id || !isConnected || isDemoRunning ? 'disabled' : ''}
                             class="ml-3 px-3 py-1 text-xs font-medium rounded ${
                                 this.loading === scenario.id
@@ -125,12 +125,12 @@ class ScenarioSelector {
                     <h3 class="text-lg font-medium text-gray-900">Demo Scenarios</h3>
                     <div class="flex space-x-2">
                         ${isDemoRunning ? `
-                            <button onclick="scenarioSelector.handleStopDemo()"
+                            <button onclick="window.scenarioSelector.handleStopDemo()"
                                     class="px-3 py-1 bg-red-100 hover:bg-red-200 text-red-800 rounded text-sm">
                                 Stop Demo
                             </button>
                         ` : ''}
-                        <button onclick="scenarioSelector.handleResetDemo()"
+                        <button onclick="window.scenarioSelector.handleResetDemo()"
                                 class="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded text-sm">
                             Reset
                         </button>
