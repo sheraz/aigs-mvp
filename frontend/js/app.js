@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize managers in correct order
     toastManager = new ToastManager();
     webSocketManager = new WebSocketManager('https://aigs-mvp.onrender.com');
-    demoManager = new DemoManager();
+    window.demoManager = new DemoManager();
     
     // Initialize all dashboard components
     window.violationsList = new ViolationsList('violations-container');
@@ -22,13 +22,8 @@ document.addEventListener('DOMContentLoaded', function() {
     window.metricsCard = new MetricsCard('metrics-container');
 
     // Initialize demo components - NEW
-    console.log('About to create DemoModeToggle');
     demoModeToggle = new DemoModeToggle('demo-toggle-container');
-    console.log('DemoModeToggle created:', demoModeToggle);
-
-    console.log('About to create ScenarioSelector');
     scenarioSelector = new ScenarioSelector('scenario-selector-container');
-    console.log('ScenarioSelector created:', scenarioSelector);
         
     console.log('Metis Dashboard initialized with demo apparently');
 });
