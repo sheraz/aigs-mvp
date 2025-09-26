@@ -143,6 +143,10 @@ class DemoManager {
             this.clearDemoViolations();
             this.isDemoRunning = false;
             this.activeScenario = null;
+        } else {
+            // Entering demo mode - reset backend demo state
+            this.isDemoRunning = false;
+            this.activeScenario = null;
         }
         
         this.triggerEvent('demo_mode_changed', this.isDemoMode);
