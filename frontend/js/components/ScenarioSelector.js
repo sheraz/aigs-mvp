@@ -11,31 +11,31 @@ class ScenarioSelector {
     }
 
     setupDemoHandlers() {
-        if (typeof demoManager === 'undefined') {
+        if (typeof window.demoManager === 'undefined') {
             setTimeout(() => this.setupDemoHandlers(), 100);
             return;
         }
 
-        demoManager.on('demo_mode_changed', () => {
+        window.demoManager.on('demo_mode_changed', () => {
             this.render();
         });
 
-        demoManager.on('scenario_started', () => {
+        window.demoManager.on('scenario_started', () => {
             this.loading = null;
             this.render();
         });
 
-        demoManager.on('demo_stopped', () => {
+        window.demoManager.on('demo_stopped', () => {
             this.render();
         });
 
-        demoManager.on('demo_reset', () => {
+        window.demoManager.on('demo_reset', () => {
             this.render();
         });
     }
 
     async handleStartScenario(scenarioId) {
-        if (!demoManager || !demoManager.isConnected()) {
+        if (!window.demoManager || !window.demoManager.isConnected()) {
             toastManager.addToast('Cannot start demo - WebSocket not connected', 'error');
             return;
         }
@@ -44,8 +44,8 @@ class ScenarioSelector {
             this.loading = scenarioId;
             this.render();
             
-            await demoManager.startScenario(scenarioId);
-            toastManager.addToast(`Started ${demoManager.scenarios[scenarioId].name} demo scenario`, 'success');
+            await window.demoManager.startScenario(scenarioId);
+            toastManager.addToast(`Started ${window.demoManager.scenarios[scenarioId].name} demo scenario`, 'success');
         } catch (error) {
             toastManager.addToast('Failed to start demo scenario', 'error');
             console.error('Error starting scenario:', error);
@@ -55,29 +55,29 @@ class ScenarioSelector {
     }
 
     handleStopDemo() {
-        if (demoManager) {
-            demoManager.stopDemo();
+        if (window.demoManager) {
+            window.demoManager.stopDemo();
             toastManager.addToast('Demo stopped', 'info');
         }
     }
 
     handleResetDemo() {
-        if (demoManager) {
-            demoManager.resetDemo();
+        if (window.demoManager) {
+            window.demoManager.resetDemo();
             toastManager.addToast('Demo data cleared', 'info');
         }
     }
 
     render() {
-        if (!demoManager || !demoManager.isDemoMode) {
+        if (!window.demoManager || !window.demoManager.isDemoMode) {
             this.container.innerHTML = '';
             return;
         }
 
-        const scenarios = demoManager.getScenarios();
-        const activeScenario = demoManager.activeScenario;
-        const isDemoRunning = demoManager.isDemoRunning;
-        const isConnected = demoManager.isConnected();
+        const scenarios = window.demoManager.getScenarios();
+        const activeScenario = window.demoManager.activeScenario;
+        const isDemoRunning = window.demoManager.isDemoRunning;
+        const isConnected = window.demoManager.isConnected();
 
         const scenarioCards = Object.values(scenarios).map(scenario => `
             <div class="border rounded-lg p-4 hover:shadow-md transition-shadow ${
