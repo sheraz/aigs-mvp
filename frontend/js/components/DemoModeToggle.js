@@ -1,7 +1,9 @@
 class DemoModeToggle {
     constructor(containerId) {
         // Connect to HTML container for the demo toggle switch
+        console.log('DemoModeToggle constructor called');
         this.container = document.getElementById(containerId);
+        console.log('Container found:', this.container);
         this.init();
     }
 
