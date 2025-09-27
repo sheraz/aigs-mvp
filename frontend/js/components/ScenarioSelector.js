@@ -53,8 +53,8 @@ class ScenarioSelector {
             this.loading = scenarioId;
             this.render();
             
-            await demoManager.startScenario(scenarioId);
-            toastManager?.addToast(`Started ${demoManager.scenarios[scenarioId].name} demo scenario`, 'success');
+            await window.appController.startScenario(scenarioId);
+            toastManager?.addToast(`Started ${demoManager.getScenarios()[scenarioId].name} demo scenario`, 'success');
         } catch (error) {
             toastManager?.addToast('Failed to start demo scenario', 'error');
             console.error('Error starting scenario:', error);
@@ -68,7 +68,7 @@ class ScenarioSelector {
         const toastManager = window.appController?.getManager('toast');
         
         if (demoManager) {
-            demoManager.stopDemo();
+            window.appController.stopDemo();
             toastManager?.addToast('Demo stopped', 'info');
         }
     }
@@ -78,7 +78,7 @@ class ScenarioSelector {
         const toastManager = window.appController?.getManager('toast');
         
         if (demoManager) {
-            demoManager.resetDemo();
+            window.appController.resetDemo();
             toastManager?.addToast('Demo data cleared', 'info');
         }
     }
