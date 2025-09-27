@@ -84,8 +84,14 @@ class DemoManager {
     }
 
     setupWebSocketHandlers() {
-        // Wait for WebSocket manager to be available before setting up handlers
-        if (typeof webSocketManager === 'undefined') {
+        // Wait for AppController to be available
+        if (typeof window.appController === 'undefined') {
+            setTimeout(() => this.setupWebSocketHandlers(), 100);
+            return;
+        }
+
+        const webSocketManager = window.appController.getManager('webSocket');
+        if (!webSocketManager) {
             setTimeout(() => this.setupWebSocketHandlers(), 100);
             return;
         }
@@ -94,17 +100,14 @@ class DemoManager {
         webSocketManager.on('demo_started', () => {
             console.log('Demo started event received');
             if (this.isDemoMode) {
-                // If we're in UI demo mode, backend demo should reset our state
                 this.isDemoRunning = false;
                 this.activeScenario = null;
             } else {
-                // If we're in live mode, backend demo sets running state
                 this.isDemoRunning = true;
             }
             this.triggerEvent('demo_started');
         });
 
-        // Listen for demo violations (these come through normal violation channel)
         webSocketManager.on('violation', (violation) => {
             if (this.isDemoMode) {
                 console.log('Demo violation received:', violation);
@@ -112,6 +115,11 @@ class DemoManager {
                 this.triggerEvent('demo_violation', violation);
             }
         });
+    }
+
+    isConnected() {
+        const webSocketManager = window.appController?.getManager('webSocket');
+        return webSocketManager && webSocketManager.connected;
     }
 
     // Event system for communicating with other components
