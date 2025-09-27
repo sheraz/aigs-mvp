@@ -32,7 +32,7 @@ class DemoModeToggle {
     // Toggle demo mode on/off
     toggleDemoMode() {
         if (window.appController) {
-            window.appController.toggleDemoMode();
+           return window.appController.toggleDemoMode();
         }
     }
 
