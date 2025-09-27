@@ -42,9 +42,8 @@ class DemoModeToggle {
 
     // Toggle demo mode on/off
     toggleDemoMode() {
-        const demoManager = window.appController?.getManager('demo');
-        if (demoManager) {
-            demoManager.toggleDemoMode();
+        if (window.appController) {
+            window.appController.toggleDemoMode();
         }
     }
 
