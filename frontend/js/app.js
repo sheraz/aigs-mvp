@@ -1,29 +1,28 @@
-// Global instances
-let webSocketManager;
-let toastManager;
-let demoManager;
-let violationsList;
-let agentStatus;
-let metricsCard;
-let demoModeToggle;
-let scenarioSelector;
+// Global app controller instance
+let appController;
 
 // Initialize components when page loads
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize app controller first
+    appController = new AppController();
+    window.appController = appController; // Temporary global access
 
     // Initialize managers in correct order
-    toastManager = new ToastManager();
-    webSocketManager = new WebSocketManager('https://aigs-mvp.onrender.com');
-    window.demoManager = new DemoManager();
+    const toastManager = new ToastManager();
+    const webSocketManager = new WebSocketManager('https://aigs-mvp.onrender.com');
+    const demoManager = new DemoManager();
     
-    // Initialize all dashboard components
+    // Register managers with app controller
+    appController.registerManager('toast', toastManager);
+    appController.registerManager('webSocket', webSocketManager);
+    appController.registerManager('demo', demoManager);
+    
+    // Initialize dashboard components (will be refactored in later phases)
     window.violationsList = new ViolationsList('violations-container');
     window.agentStatus = new AgentStatus('agent-status-container');
     window.metricsCard = new MetricsCard('metrics-container');
-
-    // Initialize demo components - NEW
     window.demoModeToggle = new DemoModeToggle('demo-toggle-container');
     window.scenarioSelector = new ScenarioSelector('scenario-selector-container');
         
-    console.log('Metis Dashboard initialized with demo apparently');
+    console.log('Metis Dashboard initialized with AppController');
 });
