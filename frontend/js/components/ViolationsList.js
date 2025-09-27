@@ -15,8 +15,15 @@ class ViolationsList {
     }
 
     setupWebSocketHandlers() {
-        // Wait for WebSocket manager to be available
-        if (typeof webSocketManager === 'undefined') {
+        if (typeof window.appController === 'undefined') {
+            setTimeout(() => this.setupWebSocketHandlers(), 100);
+            return;
+        }
+
+        const webSocketManager = window.appController.getManager('webSocket');
+        const toastManager = window.appController.getManager('toast');
+        
+        if (!webSocketManager) {
             setTimeout(() => this.setupWebSocketHandlers(), 100);
             return;
         }
@@ -30,7 +37,7 @@ class ViolationsList {
             this.render();
             
             // Show toast notification
-            toastManager.addToast(
+            toastManager?.addToast(
                 `New ${violation.severity} violation: ${violation.agent_name || violation.agent_id}`,
                 violation.severity === 'HIGH' ? 'error' : 
                 violation.severity === 'MEDIUM' ? 'warning' : 'info',
@@ -47,7 +54,7 @@ class ViolationsList {
 
         // Handle demo mode events
         webSocketManager.on('demo_started', () => {
-            toastManager.addToast('Demo mode activated - Simulated violations incoming', 'info', 5000);
+            toastManager?.addToast('Demo mode activated - Simulated violations incoming', 'info', 5000);
         });
     }
 
@@ -77,6 +84,7 @@ class ViolationsList {
 
     startAutoRefresh() {
         setInterval(() => {
+            const webSocketManager = window.appController?.getManager('webSocket');
             // Only refresh if WebSocket is not connected
             if (!webSocketManager || !webSocketManager.connected) {
                 this.fetchViolations();
@@ -103,7 +111,7 @@ class ViolationsList {
         }
     }
 
-    render() {
+   render() {
         if (this.error) {
             this.container.innerHTML = `
                 <div class="bg-white shadow rounded-lg p-6">
@@ -128,6 +136,7 @@ class ViolationsList {
             return;
         }
 
+        const webSocketManager = window.appController?.getManager('webSocket');
         const isConnected = webSocketManager && webSocketManager.connected;
         
         const violationRows = this.violations.map((violation, index) => `
@@ -196,8 +205,8 @@ class ViolationsList {
                             <div class="text-gray-500 text-lg">No violations detected</div>
                             <div class="text-sm text-gray-400 mt-2">
                                 ${isConnected ? 
-                                  'Monitoring active - violations will appear here in real-time' : 
-                                  'Connect to start monitoring'}
+                                'Monitoring active - violations will appear here in real-time' : 
+                                'Connect to start monitoring'}
                             </div>
                         </div>
                     ` : ''}
