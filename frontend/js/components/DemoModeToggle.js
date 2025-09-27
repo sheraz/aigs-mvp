@@ -39,8 +39,9 @@ class DemoModeToggle {
     render() {
         const demoManager = window.appController?.getManager('demo');
         // Get current demo state
-        const isDemoMode = demoManager ? demoManager.isDemoMode : false;
-        const isDemoRunning = demoManager ? demoManager.isDemoRunning : false;
+        const appState = window.appController?.getState();
+        const isDemoMode = appState ? appState.isDemoMode : false;
+        const isDemoRunning = appState ? appState.isDemoRunning : false;
 
         // Render toggle switch with current state
         this.container.innerHTML = `
