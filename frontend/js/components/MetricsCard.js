@@ -18,8 +18,13 @@ class MetricsCard {
     }
 
     setupWebSocketHandlers() {
-        // Wait for WebSocket manager to be available
-        if (typeof webSocketManager === 'undefined') {
+        if (typeof window.appController === 'undefined') {
+            setTimeout(() => this.setupWebSocketHandlers(), 100);
+            return;
+        }
+
+        const webSocketManager = window.appController.getManager('webSocket');
+        if (!webSocketManager) {
             setTimeout(() => this.setupWebSocketHandlers(), 100);
             return;
         }
@@ -85,6 +90,7 @@ class MetricsCard {
 
    startAutoRefresh() {
         setInterval(() => {
+            const webSocketManager = window.appController?.getManager('webSocket');
             // Only refresh if WebSocket is not connected
             if (!webSocketManager || !webSocketManager.connected) {
                 this.calculateMetrics();
@@ -120,6 +126,7 @@ class MetricsCard {
             }
         ];
 
+        const webSocketManager = window.appController?.getManager('webSocket');
         const isConnected = webSocketManager && webSocketManager.connected;
 
         const cardElements = metricCards.map(card => `
