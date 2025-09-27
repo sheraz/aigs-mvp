@@ -11,25 +11,31 @@ class ScenarioSelector {
     }
 
     setupDemoHandlers() {
-        if (typeof window.demoManager === 'undefined') {
+        if (typeof window.appController === 'undefined') {
             setTimeout(() => this.setupDemoHandlers(), 100);
             return;
         }
 
-        window.demoManager.on('demo_mode_changed', () => {
+        const demoManager = window.appController.getManager('demo');
+        if (!demoManager) {
+            setTimeout(() => this.setupDemoHandlers(), 100);
+            return;
+        }
+
+        demoManager.on('demo_mode_changed', () => {
             this.render();
         });
 
-        window.demoManager.on('scenario_started', () => {
+        demoManager.on('scenario_started', () => {
             this.loading = null;
             this.render();
         });
 
-        window.demoManager.on('demo_stopped', () => {
+        demoManager.on('demo_stopped', () => {
             this.render();
         });
 
-        window.demoManager.on('demo_reset', () => {
+        demoManager.on('demo_reset', () => {
             this.render();
         });
     }
