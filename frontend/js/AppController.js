@@ -38,6 +38,7 @@ class AppController {
     }
 
     notifySubscribers(oldState, newState) {
+        console.log('Notifying subscribers:', Object.keys(this.subscribers));
         Object.values(this.subscribers).forEach(({ callback }) => {
             callback(newState, oldState);
         });
