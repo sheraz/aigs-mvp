@@ -84,17 +84,18 @@ class ScenarioSelector {
     }
 
     render() {
+        const appState = window.appController?.getState();
         const demoManager = window.appController?.getManager('demo');
         
-        if (!demoManager || !demoManager.isDemoMode) {
+        if (!appState || !appState.isDemoMode) {
             this.container.innerHTML = '';
             return;
         }
 
-        const scenarios = demoManager.getScenarios();
-        const activeScenario = demoManager.activeScenario;
-        const isDemoRunning = demoManager.isDemoRunning;
-        const isConnected = demoManager.isConnected();
+        const scenarios = demoManager ? demoManager.getScenarios() : {};
+        const activeScenario = appState.activeScenario;
+        const isDemoRunning = appState.isDemoRunning;
+        const isConnected = demoManager ? demoManager.isConnected() : false;
 
         const scenarioCards = Object.values(scenarios).map(scenario => `
             <div class="border rounded-lg p-4 hover:shadow-md transition-shadow ${
