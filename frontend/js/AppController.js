@@ -52,7 +52,6 @@ class AppController {
         return this.managers[name];
     }
 
-    // Demo mode methods (migrated from DemoManager)
     toggleDemoMode() {
         const newDemoMode = !this.state.isDemoMode;
         
@@ -71,6 +70,12 @@ class AppController {
                 isDemoRunning: false,
                 activeScenario: null
             });
+        }
+        
+        // Notify DemoManager to fire events for components
+        const demoManager = this.getManager('demo');
+        if (demoManager) {
+            demoManager.triggerEvent('demo_mode_changed', newDemoMode);
         }
         
         return newDemoMode;
