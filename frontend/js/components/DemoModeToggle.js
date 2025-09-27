@@ -14,38 +14,45 @@ class DemoModeToggle {
     }
 
     setupDemoHandlers() {
-        // Wait for demo manager to be available before setting up handlers
-        if (typeof window.demoManager === 'undefined') {
+        if (typeof window.appController === 'undefined') {
+            setTimeout(() => this.setupDemoHandlers(), 100);
+            return;
+        }
+
+        const demoManager = window.appController.getManager('demo');
+        if (!demoManager) {
             setTimeout(() => this.setupDemoHandlers(), 100);
             return;
         }
 
         // Re-render when demo mode changes
-        window.demoManager.on('demo_mode_changed', () => {
+        demoManager.on('demo_mode_changed', () => {
             this.render();
         });
 
         // Re-render when demo starts/stops
-        window.demoManager.on('demo_started', () => {
+        demoManager.on('demo_started', () => {
             this.render();
         });
 
-        window.demoManager.on('demo_stopped', () => {
+        demoManager.on('demo_stopped', () => {
             this.render();
         });
     }
 
     // Toggle demo mode on/off
     toggleDemoMode() {
-        if (typeof window.demoManager !== 'undefined') {
-            window.demoManager.toggleDemoMode();
+        const demoManager = window.appController?.getManager('demo');
+        if (demoManager) {
+            demoManager.toggleDemoMode();
         }
     }
 
     render() {
+        const demoManager = window.appController?.getManager('demo');
         // Get current demo state
-        const isDemoMode = window.demoManager ? window.demoManager.isDemoMode : false;
-        const isDemoRunning = window.demoManager ? window.demoManager.isDemoRunning : false;
+        const isDemoMode = demoManager ? demoManager.isDemoMode : false;
+        const isDemoRunning = demoManager ? demoManager.isDemoRunning : false;
 
         // Render toggle switch with current state
         this.container.innerHTML = `
