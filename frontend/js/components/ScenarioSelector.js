@@ -27,6 +27,7 @@ class ScenarioSelector {
         });
 
         demoManager.on('scenario_started', () => {
+            console.log('ScenarioSelector received scenario_started event');
             this.loading = null;
             this.render();
         });
