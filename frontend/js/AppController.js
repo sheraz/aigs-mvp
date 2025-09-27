@@ -105,6 +105,12 @@ class AppController {
                 activeScenario: scenarioId
             });
             
+            // Trigger DemoManager events
+            const demoManager = this.getManager('demo');
+            if (demoManager) {
+                demoManager.triggerEvent('scenario_started', scenarioId);
+            }
+
             return true;
         } catch (error) {
             this.setState({ activeScenario: null });
