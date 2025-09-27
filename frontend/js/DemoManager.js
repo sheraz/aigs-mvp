@@ -1,11 +1,6 @@
 class DemoManager {
     constructor() {
         console.log('DemoManager constructor called');
-        // Demo mode state management
-        this.isDemoMode = false;
-        this.isDemoRunning = false;
-        this.activeScenario = null;
-        this.demoViolations = [];
         this.eventHandlers = {};
         
         // Pre-defined demo scenarios for presentations
@@ -99,27 +94,28 @@ class DemoManager {
         // Listen for demo events from backend
         webSocketManager.on('demo_started', () => {
             console.log('Demo started event received');
-            if (this.isDemoMode) {
-                this.isDemoRunning = false;
-                this.activeScenario = null;
+            const appState = window.appController.getState();
+            if (appState.isDemoMode) {
+                window.appController.setState({
+                    isDemoRunning: false,
+                    activeScenario: null
+                });
             } else {
-                this.isDemoRunning = true;
+                window.appController.setState({
+                    isDemoRunning: true
+                });
             }
             this.triggerEvent('demo_started');
         });
 
         webSocketManager.on('violation', (violation) => {
-            if (this.isDemoMode) {
+            const appState = window.appController.getState();
+            if (appState.isDemoMode) {
                 console.log('Demo violation received:', violation);
-                this.demoViolations.unshift(violation);
+                window.appController.addDemoViolation(violation);
                 this.triggerEvent('demo_violation', violation);
             }
         });
-    }
-
-    isConnected() {
-        const webSocketManager = window.appController?.getManager('webSocket');
-        return webSocketManager && webSocketManager.connected;
     }
 
     // Event system for communicating with other components
@@ -142,84 +138,18 @@ class DemoManager {
         }
     }
 
-    // Demo mode control methods
-    toggleDemoMode() {
-        this.isDemoMode = !this.isDemoMode;
-        
-        if (!this.isDemoMode) {
-            // Exiting demo mode - clear demo data
-            this.clearDemoViolations();
-            this.isDemoRunning = false;
-            this.activeScenario = null;
-        } else {
-            // Entering demo mode - reset backend demo state
-            this.isDemoRunning = false;
-            this.activeScenario = null;
-        }
-        
-        this.triggerEvent('demo_mode_changed', this.isDemoMode);
-        return this.isDemoMode;
-    }
-
-    async startScenario(scenarioId) {
-        // Check WebSocket connection before starting demo
-        if (!webSocketManager || !webSocketManager.connected) {
-            throw new Error('WebSocket not connected');
-        }
-
-        this.activeScenario = scenarioId;
-        
-        try {
-            // Call backend demo endpoint
-            const response = await fetch('https://aigs-mvp.onrender.com/demo/start', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ scenario: scenarioId })
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to start demo scenario');
-            }
-
-            this.isDemoRunning = true;
-            this.triggerEvent('scenario_started', scenarioId);
-            return true;
-        } catch (error) {
-            this.activeScenario = null;
-            throw error;
-        }
-    }
-
-    stopDemo() {
-        this.isDemoRunning = false;
-        this.activeScenario = null;
-        this.triggerEvent('demo_stopped');
-    }
-
-    resetDemo() {
-        this.clearDemoViolations();
-        this.isDemoRunning = false;
-        this.activeScenario = null;
-        this.triggerEvent('demo_reset');
-    }
-
-    clearDemoViolations() {
-        this.demoViolations = [];
-        this.triggerEvent('demo_violations_cleared');
-    }
-
     // Getters for other components to access demo state
     getScenarios() {
         return this.scenarios;
     }
 
     getDemoViolations() {
-        return this.demoViolations;
+        const appState = window.appController?.getState();
+        return appState ? appState.demoViolations : [];
     }
 
     isConnected() {
+        const webSocketManager = window.appController?.getManager('webSocket');
         return webSocketManager && webSocketManager.connected;
     }
 }
