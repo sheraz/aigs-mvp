@@ -19,16 +19,15 @@ class DemoModeToggle {
             return;
         }
 
-        // In DemoModeToggle setupDemoHandlers(), update the subscription:
         this.subscriptionId = window.appController.subscribe(this, (newState, oldState) => {
             console.log('DemoModeToggle callback fired:', newState.isDemoMode, oldState.isDemoMode);
-            // Re-render when demo mode or demo running state changes
             if (newState.isDemoMode !== oldState.isDemoMode || 
                 newState.isDemoRunning !== oldState.isDemoRunning) {
                 console.log('Calling render');
                 this.render();
             }
         });
+    }
 
     // Toggle demo mode on/off
     toggleDemoMode() {
