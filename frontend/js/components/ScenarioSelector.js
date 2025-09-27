@@ -41,8 +41,11 @@ class ScenarioSelector {
     }
 
     async handleStartScenario(scenarioId) {
-        if (!window.demoManager || !window.demoManager.isConnected()) {
-            toastManager.addToast('Cannot start demo - WebSocket not connected', 'error');
+        const demoManager = window.appController?.getManager('demo');
+        const toastManager = window.appController?.getManager('toast');
+        
+        if (!demoManager || !demoManager.isConnected()) {
+            toastManager?.addToast('Cannot start demo - WebSocket not connected', 'error');
             return;
         }
 
@@ -50,10 +53,10 @@ class ScenarioSelector {
             this.loading = scenarioId;
             this.render();
             
-            await window.demoManager.startScenario(scenarioId);
-            toastManager.addToast(`Started ${window.demoManager.scenarios[scenarioId].name} demo scenario`, 'success');
+            await demoManager.startScenario(scenarioId);
+            toastManager?.addToast(`Started ${demoManager.scenarios[scenarioId].name} demo scenario`, 'success');
         } catch (error) {
-            toastManager.addToast('Failed to start demo scenario', 'error');
+            toastManager?.addToast('Failed to start demo scenario', 'error');
             console.error('Error starting scenario:', error);
             this.loading = null;
             this.render();
@@ -61,29 +64,37 @@ class ScenarioSelector {
     }
 
     handleStopDemo() {
-        if (window.demoManager) {
-            window.demoManager.stopDemo();
-            toastManager.addToast('Demo stopped', 'info');
+        const demoManager = window.appController?.getManager('demo');
+        const toastManager = window.appController?.getManager('toast');
+        
+        if (demoManager) {
+            demoManager.stopDemo();
+            toastManager?.addToast('Demo stopped', 'info');
         }
     }
 
     handleResetDemo() {
-        if (window.demoManager) {
-            window.demoManager.resetDemo();
-            toastManager.addToast('Demo data cleared', 'info');
+        const demoManager = window.appController?.getManager('demo');
+        const toastManager = window.appController?.getManager('toast');
+        
+        if (demoManager) {
+            demoManager.resetDemo();
+            toastManager?.addToast('Demo data cleared', 'info');
         }
     }
 
     render() {
-        if (!window.demoManager || !window.demoManager.isDemoMode) {
+        const demoManager = window.appController?.getManager('demo');
+        
+        if (!demoManager || !demoManager.isDemoMode) {
             this.container.innerHTML = '';
             return;
         }
 
-        const scenarios = window.demoManager.getScenarios();
-        const activeScenario = window.demoManager.activeScenario;
-        const isDemoRunning = window.demoManager.isDemoRunning;
-        const isConnected = window.demoManager.isConnected();
+        const scenarios = demoManager.getScenarios();
+        const activeScenario = demoManager.activeScenario;
+        const isDemoRunning = demoManager.isDemoRunning;
+        const isConnected = demoManager.isConnected();
 
         const scenarioCards = Object.values(scenarios).map(scenario => `
             <div class="border rounded-lg p-4 hover:shadow-md transition-shadow ${
