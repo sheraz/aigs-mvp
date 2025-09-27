@@ -13,30 +13,19 @@ class DemoModeToggle {
         this.setupDemoHandlers();
     }
 
-    setupDemoHandlers() {
+   setupDemoHandlers() {
         if (typeof window.appController === 'undefined') {
             setTimeout(() => this.setupDemoHandlers(), 100);
             return;
         }
 
-        const demoManager = window.appController.getManager('demo');
-        if (!demoManager) {
-            setTimeout(() => this.setupDemoHandlers(), 100);
-            return;
-        }
-
-        // Re-render when demo mode changes
-        demoManager.on('demo_mode_changed', () => {
-            this.render();
-        });
-
-        // Re-render when demo starts/stops
-        demoManager.on('demo_started', () => {
-            this.render();
-        });
-
-        demoManager.on('demo_stopped', () => {
-            this.render();
+        // Subscribe directly to AppController state changes
+        this.subscriptionId = window.appController.subscribe(this, (newState, oldState) => {
+            // Re-render when demo mode or demo running state changes
+            if (newState.isDemoMode !== oldState.isDemoMode || 
+                newState.isDemoRunning !== oldState.isDemoRunning) {
+                this.render();
+            }
         });
     }
 
