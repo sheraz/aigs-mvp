@@ -58,7 +58,7 @@ class ToastManager {
                             ${toast.message}
                         </p>
                     </div>
-                    <button onclick="toastManager.removeToast(${toast.id})"
+                    <button onclick="window.appController.getManager('toast').removeToast(${toast.id})"
                             class="ml-4 inline-flex text-gray-400 hover:text-gray-600">
                         <span class="sr-only">Close</span>
                         ×
