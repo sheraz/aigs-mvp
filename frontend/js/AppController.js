@@ -102,8 +102,9 @@ class AppController {
 
             this.setState({
                 isDemoRunning: true,
-                activeScenario: scenarioId
+                activeScenario: scenarioId   
             });
+            console.log('AppController: Demo started, state is now:', this.state);
             
             // Trigger DemoManager events
             const demoManager = this.getManager('demo');
