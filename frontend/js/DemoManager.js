@@ -95,16 +95,9 @@ class DemoManager {
         webSocketManager.on('demo_started', () => {
             console.log('Demo started event received');
             const appState = window.appController.getState();
-            if (appState.isDemoMode) {
-                window.appController.setState({
-                    isDemoRunning: false,
-                    activeScenario: null
-                });
-            } else {
-                window.appController.setState({
-                    isDemoRunning: true
-                });
-            }
+            window.appController.setState({
+                isDemoRunning: true
+            });
             this.triggerEvent('demo_started');
         });
 
