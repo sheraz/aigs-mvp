@@ -1,3 +1,5 @@
+const fetch = require('node-fetch');
+
 class ProxyTestAgent {
     constructor() {
         this.agentId = 'proxy-test-agent-' + Date.now();
