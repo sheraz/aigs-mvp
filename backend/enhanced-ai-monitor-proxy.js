@@ -67,7 +67,7 @@ async function reportActivityToMetis(activityType, details) {
     }
 }
 
-app.use('/ai-proxy/*', (req, res) => {
+app.use('/ai-proxy', (req, res) => {
     const targetUrl = req.headers['x-target-url'] || req.params[0];
     const agentId = req.headers['x-agent-id'] || 'unknown-agent';
     
