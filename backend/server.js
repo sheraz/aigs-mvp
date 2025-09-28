@@ -269,6 +269,31 @@ app.post('/demo/start', (req, res) => {
     }, index * 3000); // 3 second delay between violations
   });
 
+  // POST /violations - Direct violation reporting endpoint
+  app.post('/violations', (req, res) => {
+      const violation = req.body;
+      
+      // Log the violation
+      console.log('New violation received:', violation);
+      
+      // Broadcast to connected WebSocket clients
+      io.emit('violation', violation);
+      
+      // Store in database (optional)
+      dbOperations.addViolation(violation, (err) => {
+          if (err) {
+              console.error('Failed to store violation:', err);
+          }
+      });
+    
+    res.status(201).json({ 
+        success: true, 
+        message: 'Violation recorded',
+        violationId: violation.agent_id + '_' + Date.now()
+    });
+});
+
+
   res.json({ 
     status: 'demo_started',
     message: 'Demo violations will be sent to connected dashboards',
