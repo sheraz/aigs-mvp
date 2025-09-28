@@ -23,6 +23,10 @@ class ScenarioSelector {
                 newState.isDemoRunning !== oldState.isDemoRunning ||
                 newState.activeScenario !== oldState.activeScenario
             ) {
+                // Clear loading state when demo stops
+                if (newState.isDemoRunning === false && oldState.isDemoRunning === true) {
+                    this.loading = null;
+                }
                 console.log('State changed, triggering render...');
                 this.render();
             }
