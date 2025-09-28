@@ -62,12 +62,15 @@ class ScenarioSelector {
     handleStopDemo() {
         const demoManager = window.appController?.getManager('demo');
         const toastManager = window.appController?.getManager('toast');
-        
+
         if (demoManager) {
             window.appController.stopDemo();
             toastManager?.addToast('Demo stopped', 'info');
+            this.loading = null;  // Reset loading state
+            this.render();  // Force a render to update the UI
         }
     }
+
 
     handleResetDemo() {
         const demoManager = window.appController?.getManager('demo');
