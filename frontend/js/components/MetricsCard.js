@@ -67,11 +67,18 @@ class MetricsCard {
         const now = new Date();
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         
-        const violationsToday = violations.filter(v => 
+        // Get demo violations from AppController
+        const appState = window.appController?.getState();
+        const demoViolations = appState ? appState.demoViolations : [];
+        
+        // Combine regular violations with demo violations
+        const allViolations = [...violations, ...demoViolations];
+        
+        const violationsToday = allViolations.filter(v => 
             new Date(v.timestamp) >= today
         );
         
-        const highSeverityCount = violations.filter(v => 
+        const highSeverityCount = allViolations.filter(v => 
             v.severity === 'HIGH'
         ).length;
         
@@ -82,7 +89,7 @@ class MetricsCard {
             console.log('Calculated per hour:', violationsPerHour);
 
         this.metrics = {
-            totalViolations: violations.length,
+            totalViolations: allViolations.length,
             violationsToday: violationsToday.length,
             highSeverityCount,
             violationsPerHour: Math.round(violationsPerHour * 10) / 10
