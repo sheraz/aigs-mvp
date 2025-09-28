@@ -77,6 +77,9 @@ class MetricsCard {
         
         const violationsPerHour = violationsToday.length > 0 ? 
             violationsToday.length / ((now - today) / (1000 * 60 * 60)) : 0;
+            console.log('Violations today:', violationsToday.length);
+            console.log('Hours elapsed:', (now - today) / (1000 * 60 * 60));
+            console.log('Calculated per hour:', violationsPerHour);
 
         this.metrics = {
             totalViolations: violations.length,
