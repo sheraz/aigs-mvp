@@ -2,6 +2,7 @@ class ScenarioSelector {
     constructor(containerId) {
         this.container = document.getElementById(containerId);
         this.loading = null; // tracks which scenario is loading
+        this.subscriptionId = null; 
         this.init();
     }
 
@@ -15,31 +16,31 @@ class ScenarioSelector {
             setTimeout(() => this.setupDemoHandlers(), 100);
             return;
         }
-
+        // Unsubscribe from DemoManager events
         const demoManager = window.appController.getManager('demo');
-        if (!demoManager) {
-            setTimeout(() => this.setupDemoHandlers(), 100);
-            return;
+        if (demoManager) {
+            demoManager.off('demo_mode_changed');
+            demoManager.off('scenario_started');
+            demoManager.off('demo_stopped');
+            demoManager.off('demo_reset');
         }
-
-        demoManager.on('demo_mode_changed', () => {
-            this.render();
-        });
-
-        demoManager.on('scenario_started', () => {
-            console.log('ScenarioSelector received scenario_started event');
-            this.loading = null;
-            this.render();
-        });
-
-        demoManager.on('demo_stopped', () => {
-            this.render();
-        });
-
-        demoManager.on('demo_reset', () => {
-            this.render();
+        // Subscribe to AppController state changes
+        this.subscriptionId = window.appController.subscribe(this, (newState, oldState) => {
+            if (
+                newState.isDemoMode !== oldState.isDemoMode ||
+                newState.isDemoRunning !== oldState.isDemoRunning ||
+                newState.activeScenario !== oldState.activeScenario
+            ) {
+                this.render();
+            }
         });
     }
+    destroy() {
+        if (this.subscriptionId && window.appController) {
+            window.appController.unsubscribe(this.subscriptionId);
+        }
+    }
+
 
     async handleStartScenario(scenarioId) {
         const demoManager = window.appController?.getManager('demo');
