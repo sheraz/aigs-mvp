@@ -51,6 +51,8 @@ async function reportActivityToMetis(activityType, details) {
 
         const logPrefix = details.authorized ? '✅ AUTHORIZED' : '🚨 VIOLATION';
         console.log(`${logPrefix}:`, activity.reason);
+
+        console.log(`Attempting to report to: ${METIS_BACKEND}/violations`);
         
         const response = await fetch(`${METIS_BACKEND}/violations`, {
             method: 'POST',
