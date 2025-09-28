@@ -76,7 +76,10 @@ app.use('/ai-proxy', createProxyMiddleware({
     },
     router: (req) => {
         const targetUrl = req.headers['x-target-url'] || req.query.target;
-        return targetUrl ? `https://${targetUrl}` : 'https://httpbin.org';
+        if (targetUrl) {
+            return `https://${targetUrl.split('/')[0]}`;
+        }
+        return 'https://httpbin.org';
     },
     onProxyReq: (proxyReq, req, res) => {
         const agentId = req.headers['x-agent-id'] || 'unknown-agent';
