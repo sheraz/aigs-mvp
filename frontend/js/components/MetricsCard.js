@@ -92,7 +92,7 @@ class MetricsCard {
             totalViolations: allViolations.length,
             violationsToday: violationsToday.length,
             highSeverityCount,
-            violationsPerHour: Math.round(violationsPerHour * 10) / 10
+            violationsPerHour: Math.round(violationsPerHour * 100) / 100
         };
         
         this.render();
