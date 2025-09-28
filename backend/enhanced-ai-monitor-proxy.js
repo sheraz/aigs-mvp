@@ -3,7 +3,8 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 const app = express();
 
 // Your Metis backend URL for reporting violations
-const METIS_BACKEND = 'https://aigs-mvp.onrender.com';
+//const METIS_BACKEND = 'https://aigs-mvp.onrender.com';
+const METIS_BACKEND = 'http://localhost:3001';
 
 // Define unauthorized endpoints for AI agents
 const UNAUTHORIZED_ENDPOINTS = [
