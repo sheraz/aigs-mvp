@@ -16,14 +16,6 @@ class ScenarioSelector {
             setTimeout(() => this.setupDemoHandlers(), 100);
             return;
         }
-        // Unsubscribe from DemoManager events
-        const demoManager = window.appController.getManager('demo');
-        if (demoManager) {
-            demoManager.off('demo_mode_changed');
-            demoManager.off('scenario_started');
-            demoManager.off('demo_stopped');
-            demoManager.off('demo_reset');
-        }
         // Subscribe to AppController state changes
         this.subscriptionId = window.appController.subscribe(this, (newState, oldState) => {
             if (
@@ -31,10 +23,12 @@ class ScenarioSelector {
                 newState.isDemoRunning !== oldState.isDemoRunning ||
                 newState.activeScenario !== oldState.activeScenario
             ) {
+                console.log('State changed, triggering render...');
                 this.render();
             }
         });
     }
+
     destroy() {
         if (this.subscriptionId && window.appController) {
             window.appController.unsubscribe(this.subscriptionId);
