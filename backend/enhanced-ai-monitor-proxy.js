@@ -82,6 +82,7 @@ app.use('/ai-proxy', createProxyMiddleware({
         return 'https://httpbin.org';
     },
     onProxyReq: (proxyReq, req, res) => {
+        console.log('🔧 onProxyReq triggered');
         const agentId = req.headers['x-agent-id'] || 'unknown-agent';
         const targetUrl = req.headers['x-target-url'] || req.query.target || 'unknown';
         const userAgent = req.headers['user-agent'] || '';
