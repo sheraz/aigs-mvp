@@ -3,8 +3,6 @@ const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
 require('dotenv').config();
-
-// Add this after the existing imports
 const { dbOperations } = require('./database');
 const { detectViolation } = require('./detector');
 
@@ -16,7 +14,6 @@ const io = socketIo(server, {
     methods: ["GET", "POST"]
   }
 });
-
 const PORT = process.env.PORT || 3001;
 
 // Middleware
@@ -65,7 +62,7 @@ function startDemoMode(socket) {
       timestamp: new Date().toISOString()
     },
     {
-      id: 'demo-2', 
+      id: 'demo-2',
       agent_id: 'hr-screening-ai',
       agent_name: 'HR Screening AI',
       action_type: 'access_protected_characteristics',
@@ -76,7 +73,7 @@ function startDemoMode(socket) {
     },
     {
       id: 'demo-3',
-      agent_id: 'customer-service-ai', 
+      agent_id: 'customer-service-ai',
       agent_name: 'Customer Service AI',
       action_type: 'share_personal_data_externally',
       severity: 'MEDIUM',
@@ -97,7 +94,7 @@ function startDemoMode(socket) {
 
 // Test endpoint
 app.get('/', (req, res) => {
-  res.json({ 
+  res.json({
     message: 'AIGS API is running!',
     timestamp: new Date().toISOString()
   });
@@ -106,11 +103,11 @@ app.get('/', (req, res) => {
 // 1. ENDPOINT: AI agents report actions (WITH VIOLATION DETECTION + WEBSOCKETS)
 app.post('/agent/action', (req, res) => {
   const { agentId, action, details } = req.body;
-  
+
   // Validate required fields
   if (!agentId || !action) {
-    return res.status(400).json({ 
-      error: 'Missing required fields: agentId and action' 
+    return res.status(400).json({
+      error: 'Missing required fields: agentId and action'
     });
   }
 
@@ -148,7 +145,7 @@ app.post('/agent/action', (req, res) => {
             console.error('Failed to store violation:', err);
           } else {
             console.log(`🚨 VIOLATION DETECTED: ${agentId} attempted ${action}`);
-            
+
             // Send real-time alert to connected dashboards
             io.emit('violation', {
               ...result.violation,
@@ -174,11 +171,13 @@ app.get('/violations', (req, res) => {
       console.error('Database error:', err);
       return res.status(500).json({ error: 'Failed to fetch violations' });
     }
+
     // Parse JSON strings back to objects
     const parsedViolations = violations.map(violation => ({
       ...violation,
       details: JSON.parse(violation.details || '{}')
     }));
+
     res.json(parsedViolations);
   });
 });
@@ -186,23 +185,27 @@ app.get('/violations', (req, res) => {
 // 3. ENDPOINT: Set agent permissions
 app.post('/permissions', (req, res) => {
   const { agentId, name, permissions } = req.body;
+
   // Validate required fields
   if (!agentId || !permissions) {
-    return res.status(400).json({ 
-      error: 'Missing required fields: agentId and permissions' 
+    return res.status(400).json({
+      error: 'Missing required fields: agentId and permissions'
     });
   }
+
   const agentData = {
     id: agentId,
     name: name || agentId,
     permissions: permissions // Should be array like ["read_data", "write_files"]
   };
+
   dbOperations.upsertAgent(agentData, (err) => {
     if (err) {
       console.error('Database error:', err);
       return res.status(500).json({ error: 'Failed to update permissions' });
     }
-    res.json({ 
+
+    res.json({
       status: 'updated',
       message: `Permissions set for ${agentId}`,
       agent: agentData
@@ -213,19 +216,23 @@ app.post('/permissions', (req, res) => {
 // 4. BONUS ENDPOINT: Get agent info
 app.get('/agent/:agentId', (req, res) => {
   const { agentId } = req.params;
+
   dbOperations.getAgent(agentId, (err, agent) => {
     if (err) {
       console.error('Database error:', err);
       return res.status(500).json({ error: 'Failed to fetch agent' });
     }
+
     if (!agent) {
       return res.status(404).json({ error: 'Agent not found' });
     }
+
     // Parse permissions JSON
     const parsedAgent = {
       ...agent,
       permissions: JSON.parse(agent.permissions || '[]')
     };
+
     res.json(parsedAgent);
   });
 });
@@ -233,9 +240,9 @@ app.get('/agent/:agentId', (req, res) => {
 // Demo mode endpoint
 app.post('/demo/start', (req, res) => {
   console.log('Demo mode triggered via API');
-  
+
   // Broadcast to all connected dashboards
-  io.emit('demo_started', { 
+  io.emit('demo_started', {
     message: 'Demo mode activated',
     timestamp: new Date().toISOString()
   });
@@ -253,7 +260,7 @@ app.post('/demo/start', (req, res) => {
     },
     {
       id: Date.now() + 1,
-      agent_id: 'demo-hr-ai', 
+      agent_id: 'demo-hr-ai',
       agent_name: 'HR AI Assistant',
       action_type: 'process_employee_data',
       severity: 'MEDIUM',
@@ -269,35 +276,34 @@ app.post('/demo/start', (req, res) => {
     }, index * 3000); // 3 second delay between violations
   });
 
-  // POST /violations - Direct violation reporting endpoint
-  app.post('/violations', (req, res) => {
-      const violation = req.body;
-      
-      // Log the violation
-      console.log('New violation received:', violation);
-      
-      // Broadcast to connected WebSocket clients
-      io.emit('violation', violation);
-      
-      // Store in database (optional)
-      dbOperations.addViolation(violation, (err) => {
-          if (err) {
-              console.error('Failed to store violation:', err);
-          }
-      });
-    
-    res.status(201).json({ 
-        success: true, 
-        message: 'Violation recorded',
-        violationId: violation.agent_id + '_' + Date.now()
-    });
-});
-
-
-  res.json({ 
+  res.json({
     status: 'demo_started',
     message: 'Demo violations will be sent to connected dashboards',
     connectedClients: connectedClients
+  });
+});
+
+// POST /violations - Direct violation reporting endpoint
+app.post('/violations', (req, res) => {
+  const violation = req.body;
+
+  // Log the violation
+  console.log('New violation received:', violation);
+
+  // Broadcast to connected WebSocket clients
+  io.emit('violation', violation);
+
+  // Store in database (optional)
+  dbOperations.addViolation(violation, (err) => {
+    if (err) {
+      console.error('Failed to store violation:', err);
+    }
+  });
+
+  res.status(201).json({
+    success: true,
+    message: 'Violation recorded',
+    violationId: violation.agent_id + '_' + Date.now()
   });
 });
 
