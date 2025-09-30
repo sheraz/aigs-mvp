@@ -24,58 +24,61 @@ class AIControlInterface {
     }
 
     connectToBackend() {
-        this.log('Attempting to connect to AI agent backend...', 'info');
+    this.log('Attempting to connect to AI agent backend...', 'info');
 
-        let retryCount = 0;
-        const maxRetries = 5;
-        const retryDelay = 3000; // 3 seconds
+    let retryCount = 0;
+    const maxRetries = 5; // Maximum number of reconnection attempts
+    const retryDelay = 5000; // 5 seconds between retries
 
-        const connectWithRetry = () => {
-            this.ws = new WebSocket('ws://localhost:8081');
+    const connectWithRetry = () => {
+        this.ws = new WebSocket('wss://aigs-mvp.onrender.com');
 
-            this.ws.onopen = () => {
-                this.connected = true;
-                this.connectionStatus.textContent = 'Connected to AI Agent Backend';
-                this.connectionStatus.className = 'status connected';
-                this.updateButtons();
-                this.log('Connected to AI agent backend successfully', 'success');
-                retryCount = 0; // Reset retry count on successful connection
-            };
-
-            this.ws.onmessage = (event) => {
-                try {
-                    const message = JSON.parse(event.data);
-                    this.handleBackendMessage(message);
-                } catch (error) {
-                    this.log(`Error parsing message: ${error.message}`, 'error');
-                }
-            };
-
-            this.ws.onclose = () => {
-                this.connected = false;
-                this.connectionStatus.textContent = 'Disconnected from AI Agent Backend';
-                this.connectionStatus.className = 'status disconnected';
-                this.agentInfo.style.display = 'none';
-                this.updateButtons();
-                this.log('Disconnected from AI agent backend', 'warning');
-
-                // Attempt to reconnect if not exceeding max retries
-                if (retryCount < maxRetries) {
-                    retryCount++;
-                    this.log(`Attempting to reconnect (${retryCount}/${maxRetries})...`, 'info');
-                    setTimeout(connectWithRetry, retryDelay);
-                } else {
-                    this.log(`Max reconnection attempts (${maxRetries}) reached. Please check the backend.`, 'error');
-                }
-            };
-
-            this.ws.onerror = (error) => {
-                this.log(`WebSocket error: ${error.message || 'Connection failed'}`, 'error');
-            };
+        this.ws.onopen = () => {
+            this.connected = true;
+            this.connectionStatus.textContent = 'Connected to AI Agent Backend';
+            this.connectionStatus.className = 'status connected';
+            this.updateButtons();
+            this.log('Connected to AI agent backend successfully', 'success');
+            retryCount = 0; // Reset retry count on successful connection
         };
 
-        connectWithRetry(); // Initial connection attempt
-    }
+        this.ws.onmessage = (event) => {
+            try {
+                const message = JSON.parse(event.data);
+                this.handleBackendMessage(message);
+            } catch (error) {
+                this.log(`Error parsing message: ${error.message}`, 'error');
+            }
+        };
+
+        this.ws.onclose = () => {
+            this.connected = false;
+            this.connectionStatus.textContent = 'Disconnected from AI Agent Backend';
+            this.connectionStatus.className = 'status disconnected';
+            this.agentInfo.style.display = 'none';
+            this.updateButtons();
+            this.log('Disconnected from AI agent backend', 'warning');
+
+            // Attempt to reconnect if not exceeding max retries
+            if (retryCount < maxRetries) {
+                retryCount++;
+                this.log(`Attempting to reconnect (${retryCount}/${maxRetries})...`, 'info');
+                setTimeout(connectWithRetry, retryDelay);
+            } else {
+                this.log(`Max reconnection attempts (${maxRetries}) reached. Please check the backend.`, 'error');
+            }
+        };
+
+        this.ws.onerror = (error) => {
+            this.log(`WebSocket error: ${error.message || 'Connection failed'}`, 'error');
+            this.connectionStatus.textContent = 'Connection Error';
+            this.connectionStatus.className = 'status disconnected';
+        };
+    };
+
+    connectWithRetry(); // Initial connection attempt
+}
+
 
     handleBackendMessage(message) {
         switch (message.type) {
