@@ -17,6 +17,7 @@
     "express": "^5.1.0",
     "http-proxy-middleware": "^3.0.5",
     "socket.io": "^4.8.1",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "ws": "^8.18.3"
   }
 }
