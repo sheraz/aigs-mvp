@@ -31,7 +31,7 @@ class AIControlInterface {
     const retryDelay = 5000; // 5 seconds between retries
 
     const connectWithRetry = () => {
-        this.ws = new WebSocket('wss://aigs-mvp.onrender.com');
+        this.ws = new WebSocket('ws://localhost:8081');
 
         this.ws.onopen = () => {
             this.connected = true;
