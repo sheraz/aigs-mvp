@@ -67,39 +67,66 @@ async function reportActivityToMetis(activityType, details) {
     }
 }
 
-app.use('/ai-proxy', (req, res) => {
+app.use('/ai-proxy', async (req, res) => {
     const targetUrl = req.headers['x-target-url'] || req.params[0];
     const agentId = req.headers['x-agent-id'] || 'unknown-agent';
     
     console.log(`🔍 MONITORING: Agent ${agentId} accessing ${targetUrl}`);
     
-    // Check for violations here
+// Actually fetch the target endpoint
+try {
+    const targetResponse = await fetch(`https://${targetUrl}`, {
+        method: req.method,
+        headers: {
+            'User-Agent': req.headers['user-agent'] || 'Metis-Monitor-Proxy'
+        }
+    });
+    
+    console.log(`📡 TARGET RESPONSE: ${targetUrl} returned ${targetResponse.status} ${targetResponse.statusText}`);
+    
+    // Define base details object
+    const details = {
+        agentId: agentId,
+        agentName: `AI Agent ${agentId}`,
+        targetUrl: targetUrl,
+        method: req.method,
+        userAgent: req.headers['user-agent'],
+        severity: isUnauthorizedEndpoint(targetUrl) ? 'HIGH' : 'INFO',
+        authorized: isAuthorizedEndpoint(targetUrl)
+    };
+    
+    // Update the details object with actual response code
+    const updatedDetails = {
+        ...details,
+        targetResponseCode: targetResponse.status,
+        targetResponseText: targetResponse.statusText
+    };
+    
+    // Report with actual response code
     if (isUnauthorizedEndpoint(targetUrl)) {
         reportActivityToMetis('unauthorized_network_access', {
-            agentId: agentId,
-            agentName: `AI Agent ${agentId}`,
-            targetUrl: targetUrl,
-            method: req.method,
-            userAgent: req.headers['user-agent'],
-            severity: 'HIGH',
-            authorized: false,
-            reason: `Attempted access to restricted endpoint: ${targetUrl}`
+            ...updatedDetails,
+            reason: `Attempted access to restricted endpoint: ${targetUrl} (HTTP ${targetResponse.status})`
         });
     } else if (isAuthorizedEndpoint(targetUrl)) {
         reportActivityToMetis('authorized_network_access', {
-            agentId: agentId,
-            agentName: `AI Agent ${agentId}`,
-            targetUrl: targetUrl,
-            method: req.method,
-            userAgent: req.headers['user-agent'],
-            severity: 'INFO',
-            authorized: true,
-            reason: `Authorized access to approved endpoint: ${targetUrl}`
+            ...updatedDetails,
+            reason: `Authorized access to approved endpoint: ${targetUrl} (HTTP ${targetResponse.status})`
         });
     }
     
-    // Proxy the request manually
-    res.json({ status: 'monitored', target: targetUrl });
+    // Return the actual response to the agent
+    res.status(targetResponse.status).json({ 
+        status: 'monitored', 
+        target: targetUrl,
+        actualStatus: targetResponse.status
+    });
+    
+} catch (error) {
+    console.error(`❌ Failed to fetch ${targetUrl}:`, error.message);
+    res.status(502).json({ error: 'Proxy fetch failed' });
+}
+
 });
 
 app.get('/health', (req, res) => {
